@@ -13,14 +13,9 @@ SPI_HandleTypeDef hspi1;
 DMA_HandleTypeDef HdmaCh2;
 DMA_HandleTypeDef HdmaCh3;
 
-uint16_t W25QXX_TYPE = 0;  /* W25QXX_TYPE ? main.c ??????? */
+uint16_t W25QXX_TYPE = 0; 
 uint32_t W25QXX_FlashSizeBytes = W25QXX_FLASH_SIZE_BYTES;
 static const uint8_t W25QXX_DMA_DUMMY_BYTE = 0xFFU;
-
-
-/* ========================================================================== */
-/*  SPI ??????                                                           */
-/* ========================================================================== */
 
 /**
  * @brief  SPI ????????

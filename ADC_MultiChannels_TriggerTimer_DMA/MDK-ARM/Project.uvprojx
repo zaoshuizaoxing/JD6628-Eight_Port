@@ -408,6 +408,11 @@
               <FilePath>..\Src\APP_I2C.c</FilePath>
             </File>
             <File>
+              <FileName>APP_LCD_KeyPage.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\APP_LCD_KeyPage.c</FilePath>
+            </File>
+            <File>
               <FileName>py32f031_hal_msp.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Src\py32f031_hal_msp.c</FilePath>

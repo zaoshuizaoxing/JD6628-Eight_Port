@@ -15,6 +15,7 @@ extern "C" {
 #include "w25qxx.h"
 #include "uart_flash_loader.h"
 #include "lcd_spi.h"
+#include "APP_LCD_KeyPage.h"
 
 extern UART_HandleTypeDef huart1;
 extern SPI_HandleTypeDef hspi2;

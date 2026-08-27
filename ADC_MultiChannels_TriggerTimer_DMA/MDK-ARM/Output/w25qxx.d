@@ -31,3 +31,4 @@
 .\output\w25qxx.o: ..\Inc\w25qxx.h
 .\output\w25qxx.o: ..\Inc\uart_flash_loader.h
 .\output\w25qxx.o: ..\Inc\lcd_spi.h
+.\output\w25qxx.o: ..\Inc\APP_LCD_KeyPage.h

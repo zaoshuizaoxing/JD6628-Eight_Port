@@ -1,5 +1,9 @@
 #include "main.h"
 
+#if ENABLE_UART_FLASH_LOADER && ENABLE_LCD_KEY_PAGE_MODE
+#error "UART flash loader and LCD key page mode cannot be enabled together."
+#endif
+
 UART_HandleTypeDef huart1;
 SPI_HandleTypeDef hspi2;
 
@@ -11,7 +15,7 @@ static void APP_SPI2_LCD_Init(void);
 int main(void)
 {
   HAL_Init();
-  APP_SystemClockConfig();
+  APP_SystemClockConfig();  
   W25QXX_Init();
   APP_UART1_Init();
   APP_I2C_Init();
@@ -19,10 +23,14 @@ int main(void)
   ST7789_Init();
   while (1)
   {
-#if ENABLE_UART_FLASH_LOADER
-    UartFlashLoader_Run();
-#endif
+  #if ENABLE_UART_FLASH_LOADER
+      UartFlashLoader_Run();
+  #endif
 
+  #if ENABLE_LCD_KEY_PAGE_MODE
+    APP_LCD_KeyPage_Run();
+  #endif
+  
   }
 }
 

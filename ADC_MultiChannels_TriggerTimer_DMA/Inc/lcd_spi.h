@@ -11,7 +11,7 @@ extern "C" {
 #define ST7789_HEIGHT       240U
 #define ST7789_PIXEL_BYTES  2U
 #define ST7789_FRAME_BYTES  (ST7789_WIDTH * ST7789_HEIGHT * ST7789_PIXEL_BYTES)
-#define ST7789_ROTATION     0U  //方向旋转宏
+#define ST7789_ROTATION     90U  //方向旋转宏
 
 #define LCD_RST_GPIO_PORT  GPIOA
 #define LCD_RST_PIN        GPIO_PIN_12

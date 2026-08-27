@@ -31,3 +31,4 @@
 .\output\py32f031_hal_msp.o: ..\Inc\main.h
 .\output\py32f031_hal_msp.o: ..\Inc\uart_flash_loader.h
 .\output\py32f031_hal_msp.o: ..\Inc\lcd_spi.h
+.\output\py32f031_hal_msp.o: ..\Inc\APP_LCD_KeyPage.h

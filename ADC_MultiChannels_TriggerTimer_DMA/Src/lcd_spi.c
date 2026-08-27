@@ -19,6 +19,7 @@ extern DMA_HandleTypeDef HdmaCh3;
 #define ST7789_X_OFFSET         0U
 #define ST7789_Y_OFFSET         0U
 #endif
+
 static uint8_t st7789_line_buf[ST7789_LINE_BUF_SIZE];
 static volatile uint8_t st7789_dma_done = 1U;
 static volatile uint8_t st7789_dma_error = 0U;

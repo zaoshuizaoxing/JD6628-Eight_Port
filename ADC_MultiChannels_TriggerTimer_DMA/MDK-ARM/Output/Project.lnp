@@ -3,6 +3,7 @@
 ".\output\system_py32f031.o"
 ".\output\main.o"
 ".\output\app_i2c.o"
+".\output\app_lcd_keypage.o"
 ".\output\py32f031_hal_msp.o"
 ".\output\py32f031_it.o"
 ".\output\w25qxx.o"

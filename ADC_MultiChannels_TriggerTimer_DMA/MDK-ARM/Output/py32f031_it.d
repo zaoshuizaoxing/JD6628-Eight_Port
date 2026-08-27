@@ -31,4 +31,5 @@
 .\output\py32f031_it.o: ..\Inc\main.h
 .\output\py32f031_it.o: ..\Inc\uart_flash_loader.h
 .\output\py32f031_it.o: ..\Inc\lcd_spi.h
+.\output\py32f031_it.o: ..\Inc\APP_LCD_KeyPage.h
 .\output\py32f031_it.o: ..\Inc\py32f031_it.h

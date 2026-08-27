@@ -31,3 +31,4 @@
 .\output\main.o: ..\Inc\main.h
 .\output\main.o: ..\Inc\uart_flash_loader.h
 .\output\main.o: ..\Inc\lcd_spi.h
+.\output\main.o: ..\Inc\APP_LCD_KeyPage.h

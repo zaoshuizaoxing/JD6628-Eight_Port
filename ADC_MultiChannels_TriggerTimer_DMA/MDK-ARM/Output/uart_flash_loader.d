@@ -31,3 +31,4 @@
 .\output\uart_flash_loader.o: ..\Inc\APP_I2C.h
 .\output\uart_flash_loader.o: ..\Inc\w25qxx.h
 .\output\uart_flash_loader.o: ..\Inc\lcd_spi.h
+.\output\uart_flash_loader.o: ..\Inc\APP_LCD_KeyPage.h
