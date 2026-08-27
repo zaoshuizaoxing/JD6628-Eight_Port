@@ -8,6 +8,17 @@ extern DMA_HandleTypeDef HdmaCh3;
 #define ST7789_LINE_BUF_SIZE   128U
 #define ST7789_DMA_TIMEOUT_MS  1000U
 
+//优化旋转方向
+#if (ST7789_ROTATION == 180U)
+#define ST7789_X_OFFSET         0U
+#define ST7789_Y_OFFSET         80U
+#elif (ST7789_ROTATION == 270U)
+#define ST7789_X_OFFSET         80U
+#define ST7789_Y_OFFSET         0U
+#else
+#define ST7789_X_OFFSET         0U
+#define ST7789_Y_OFFSET         0U
+#endif
 static uint8_t st7789_line_buf[ST7789_LINE_BUF_SIZE];
 static volatile uint8_t st7789_dma_done = 1U;
 static volatile uint8_t st7789_dma_error = 0U;
@@ -33,7 +44,7 @@ void ST7789_SendByte(uint8_t dat, ST7789_DCType dc)
   if (dc == ST7789_DATA)
   {
     ST7789_DC_HIGH();
-  }
+  } 
   else
   {
     ST7789_DC_LOW();
@@ -234,11 +245,11 @@ void ST7789_Init(void)
 void ST7789_Address_Set(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2)
 {
   ST7789_WriteCommand(0x2AU);
-  ST7789_SendHalfWord(x1);
-  ST7789_SendHalfWord(x2);
+  ST7789_SendHalfWord((uint16_t)(x1+ST7789_X_OFFSET));
+  ST7789_SendHalfWord((uint16_t)(x2+ST7789_X_OFFSET));
   ST7789_WriteCommand(0x2BU);
-  ST7789_SendHalfWord(y1);
-  ST7789_SendHalfWord(y2);
+  ST7789_SendHalfWord((uint16_t)(y1+ST7789_Y_OFFSET));
+  ST7789_SendHalfWord((uint16_t)(y2+ST7789_Y_OFFSET));
   ST7789_WriteCommand(0x2CU);
 }
 

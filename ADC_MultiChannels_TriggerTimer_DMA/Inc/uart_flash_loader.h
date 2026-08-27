@@ -40,4 +40,4 @@ void UartFlashLoader_DisableRxIrqAndFlush(void);
 }
 #endif
 
-#endif /* __UART_FLASH_LOADER_H */
+#endif 
