@@ -80,7 +80,7 @@ typedef struct {
     uint8_t port_value[LCD_BUSINESS_PORT_COUNT];
     uint8_t temp_value;
     uint8_t any_open;
-    uint16_t max_open_value;
+    uint16_t total_open_value;
     uint32_t sequence;
 } LcdBusinessSnapshot;
 
@@ -475,8 +475,26 @@ static void LcdResetSnapshot(LcdBusinessSnapshot *snapshot)
     }
     snapshot->temp_value = 0U;
     snapshot->any_open = 0U;
-    snapshot->max_open_value = 0U;
+    snapshot->total_open_value = 0U;
     snapshot->sequence = 0UL;
+}
+
+static void LcdUpdatePortTotal(LcdBusinessSnapshot *snapshot)
+{
+    uint8_t port;
+    uint32_t total = 0UL;
+
+    if (snapshot == 0) {
+        return;
+    }
+
+    for (port = 0U; port < LCD_BUSINESS_PORT_COUNT; port++) {
+        total += snapshot->port_value[port];
+    }
+    if (total > LCD_BUSINESS_TOTAL_VALUE_MAX) {
+        total = LCD_BUSINESS_TOTAL_VALUE_MAX;
+    }
+    snapshot->total_open_value = (uint16_t)total;
 }
 
 static void LcdResetDigitCache(void)
@@ -695,7 +713,7 @@ static void LcdRenderCurrentPage(void)
         break;
     case LCD_PAGE_SMILEY:
         if (lcd_business_snapshot.any_open != 0U) {
-            LcdRenderCharging(lcd_business_snapshot.max_open_value);
+            LcdRenderCharging(lcd_business_snapshot.total_open_value);
         } else {
             LcdResetCharging();
             LcdDisplayImage(&lcd_smiley_table[lcd_page_smiley_index]);
@@ -761,6 +779,7 @@ void APP_LCD_KeyPage_Run(void)
 
     while (1) {
         uint16_t old_minutes = lcd_business_elapsed_minutes;
+        LcdUpdatePortTotal(&lcd_business_snapshot);
         LcdUpdateTimer(lcd_business_snapshot.any_open);
         if ((lcd_page_current == LCD_PAGE_CUMULATIVE_TIME) &&
             (old_minutes != lcd_business_elapsed_minutes)) {
