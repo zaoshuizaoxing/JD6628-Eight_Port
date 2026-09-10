@@ -1,11 +1,13 @@
 #include "main.h"
 #include "APP_LCD_KeyPage.h"
+#include "APP_PortMonitor.h"
 
 #define LCD_IMAGE_BUFFER_LEN          4096U
 #define LCD_DIGIT_DATA_OFFSET         8U
 #define LCD_OVERLAY_DIGIT_GAP         0U
 #define LCD_OVERLAY_DIGIT_Y_OFFSET    8U
 #define LCD_BUSINESS_PORT_COUNT       8U
+#define LCD_BUSINESS_PORT_ON_VALUE    0x0FU
 #define LCD_BUSINESS_PORT_OFF_VALUE   0xF0U
 #define LCD_BUSINESS_PORT_VALUE_MAX   140U
 #define LCD_BUSINESS_TOTAL_VALUE_MAX  590U
@@ -121,6 +123,7 @@ static uint8_t lcd_page_charge_digit_valid = 0U;
 static uint16_t lcd_page_rendered_minutes = LCD_BUSINESS_INVALID_VALUE;
 static uint8_t lcd_page_rendered_temp_index = 0xFFU;
 static uint32_t lcd_page_rendered_drawing_seq = 0UL;
+static uint32_t lcd_port_monitor_sequence = 0UL;
 static uint16_t lcd_page_rendered_drawing_value[LCD_BUSINESS_PORT_COUNT];
 static LcdOverlayRect lcd_page_drawing_digit_rect[LCD_BUSINESS_PORT_COUNT];
 static uint8_t lcd_page_drawing_digit_valid[LCD_BUSINESS_PORT_COUNT];
@@ -497,6 +500,32 @@ static void LcdUpdatePortTotal(LcdBusinessSnapshot *snapshot)
     snapshot->total_open_value = (uint16_t)total;
 }
 
+static void LcdSyncPortMonitor(void)
+{
+    const APP_PortMonitorData *source = APP_PortMonitor_GetSnapshot();
+    uint8_t port;
+
+    if ((source == 0) || (source->valid == 0U) ||
+        (source->sequence == lcd_port_monitor_sequence)) {
+        return;
+    }
+
+    lcd_business_snapshot.any_open = 0U;
+    for (port = 0U; port < LCD_BUSINESS_PORT_COUNT; port++) {
+        uint8_t connected = source->port_connected[port];
+        lcd_business_snapshot.port_state[port] =
+            (connected != 0U) ? LCD_BUSINESS_PORT_ON_VALUE :
+                                LCD_BUSINESS_PORT_OFF_VALUE;
+        lcd_business_snapshot.port_value[port] = source->port_power_w[port];
+        if (connected != 0U) {
+            lcd_business_snapshot.any_open = 1U;
+        }
+    }
+    lcd_business_snapshot.temp_value = source->max_temperature_c;
+    lcd_business_snapshot.sequence = source->sequence;
+    lcd_port_monitor_sequence = source->sequence;
+}
+
 static void LcdResetDigitCache(void)
 {
     uint8_t port;
@@ -536,7 +565,7 @@ static void LcdUpdateDrawingDigits(uint8_t force)
                                      lcd_drawing_pos[port].y,
                                      LCD_BUSINESS_PORT_VALUE_MAX);
             lcd_page_drawing_digit_valid[port] =
-                LcdRectValid(&lcd_page_drawing_digit_rect[port]);
+            LcdRectValid(&lcd_page_drawing_digit_rect[port]);
             lcd_page_rendered_drawing_value[port] = value;
         }
     }
@@ -759,6 +788,8 @@ static void LcdRenderCurrentPage(void)
 void APP_LCD_KeyPage_Run(void)
 {
     LcdResetSnapshot(&lcd_business_snapshot);
+    APP_PortMonitor_Init();
+    lcd_port_monitor_sequence = 0UL;
     LcdKeyInit();
     LcdResetCharging();
     LcdResetDigitCache();
@@ -779,6 +810,8 @@ void APP_LCD_KeyPage_Run(void)
 
     while (1) {
         uint16_t old_minutes = lcd_business_elapsed_minutes;
+        (void)APP_PortMonitor_Poll(HAL_GetTick());
+        LcdSyncPortMonitor();
         LcdUpdatePortTotal(&lcd_business_snapshot);
         LcdUpdateTimer(lcd_business_snapshot.any_open);
         if ((lcd_page_current == LCD_PAGE_CUMULATIVE_TIME) &&

@@ -1,8 +1,7 @@
 #include "main.h"
 
-#if ENABLE_UART_FLASH_LOADER && ENABLE_LCD_KEY_PAGE_MODE
-#error "UART flash loader and LCD key page mode cannot be enabled together."
-#endif
+#define ENABLE_LCD_KEY_PAGE_MODE 0
+#define ENABLE_UART_FLASH_LOADER 1
 
 UART_HandleTypeDef huart1;
 SPI_HandleTypeDef hspi2;
@@ -26,7 +25,7 @@ int main(void)
   #if ENABLE_UART_FLASH_LOADER
       UartFlashLoader_Run();
   #endif
-
+  
   #if ENABLE_LCD_KEY_PAGE_MODE
     APP_LCD_KeyPage_Run();
   #endif
@@ -42,7 +41,7 @@ static void APP_UART1_Init(void)
   huart1.Init.StopBits = UART_STOPBITS_1;
   huart1.Init.Parity = UART_PARITY_NONE;
   huart1.Init.Mode = UART_MODE_TX_RX;
-  huart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+  huart1.Init.HwFlowCtl = UART_HWCONTROL_NONE; 
   huart1.Init.OverSampling = UART_OVERSAMPLING_16;
   huart1.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
 

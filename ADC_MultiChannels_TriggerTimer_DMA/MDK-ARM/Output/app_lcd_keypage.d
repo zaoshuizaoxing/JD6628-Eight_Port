@@ -32,3 +32,4 @@
 .\output\app_lcd_keypage.o: ..\Inc\uart_flash_loader.h
 .\output\app_lcd_keypage.o: ..\Inc\lcd_spi.h
 .\output\app_lcd_keypage.o: ..\Inc\APP_LCD_KeyPage.h
+.\output\app_lcd_keypage.o: ..\Inc\APP_PortMonitor.h

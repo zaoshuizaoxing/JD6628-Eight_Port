@@ -7,7 +7,7 @@ extern "C" {
 
 #include "py32f0xx_hal.h"
 
-#define ENABLE_UART_FLASH_LOADER 0
+
 // ============================== UART Flash ==============================
 #define UART_FLASH_FRAME_START    0xAAU     
 #define UART_FLASH_FRAME_END      0x55U      

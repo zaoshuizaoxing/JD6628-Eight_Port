@@ -13,6 +13,11 @@ extern "C" {
 #define APP_I2C_PORT_3_ID   2U
 
 void APP_I2C_Init(void);
+HAL_StatusTypeDef APP_I2C_ReadCommand(uint8_t portId,
+                                      uint8_t slaveAddress7Bit,
+                                      uint8_t command,
+                                      uint8_t *response,
+                                      uint16_t responseLength);
 HAL_StatusTypeDef APP_I2C_WriteRegister(uint8_t portId,
                                         uint8_t slaveWriteAddr,
                                         uint8_t regAddr,

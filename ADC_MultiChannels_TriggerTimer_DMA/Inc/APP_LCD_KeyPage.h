@@ -5,7 +5,6 @@
 extern "C" {
 #endif
 
-#define ENABLE_LCD_KEY_PAGE_MODE 1
 
 void APP_LCD_KeyPage_Run(void);
 
