@@ -90,6 +90,11 @@ void SysTick_Handler(void)
 /* please refer to the startup file.                                          */
 /******************************************************************************/
 
+void DMA1_Channel1_IRQHandler(void)
+{
+  HAL_DMA_IRQHandler(&HdmaCh1);
+}
+
 void DMA1_Channel2_3_IRQHandler(void)
 {
   HAL_DMA_IRQHandler(&HdmaCh2);

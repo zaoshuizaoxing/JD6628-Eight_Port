@@ -25,3 +25,10 @@
 .\output\lcd_spi.o: ..\..\Drivers\PY32F031_HAL_Driver\Inc\py32f031_hal_pwr.h
 .\output\lcd_spi.o: ..\..\Drivers\PY32F031_HAL_Driver\Inc\py32f031_hal_spi.h
 .\output\lcd_spi.o: ..\..\Drivers\PY32F031_HAL_Driver\Inc\py32f031_hal_uart.h
+.\output\lcd_spi.o: ..\Inc\w25qxx.h
+.\output\lcd_spi.o: ..\Inc\main.h
+.\output\lcd_spi.o: ..\..\Drivers\BSP\PY32F031xx_Start_Kit\py32f031xx_Start_Kit.h
+.\output\lcd_spi.o: ..\Inc\APP_I2C.h
+.\output\lcd_spi.o: ..\Inc\w25qxx.h
+.\output\lcd_spi.o: ..\Inc\uart_flash_loader.h
+.\output\lcd_spi.o: ..\Inc\APP_LCD_KeyPage.h

@@ -1,7 +1,7 @@
 #include "main.h"
 
-#define ENABLE_LCD_KEY_PAGE_MODE 0
-#define ENABLE_UART_FLASH_LOADER 1
+#define ENABLE_LCD_KEY_PAGE_MODE 1
+#define ENABLE_UART_FLASH_LOADER 0
 
 UART_HandleTypeDef huart1;
 SPI_HandleTypeDef hspi2;
@@ -60,7 +60,7 @@ static void APP_SPI2_LCD_Init(void)
   hspi2.Init.CLKPolarity = SPI_POLARITY_LOW;
   hspi2.Init.CLKPhase = SPI_PHASE_1EDGE;
   hspi2.Init.NSS = SPI_NSS_SOFT;
-  hspi2.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_2;
+  hspi2.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_4;
   hspi2.Init.FirstBit = SPI_FIRSTBIT_MSB;
   hspi2.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
   hspi2.Init.CRCPolynomial = 7U;

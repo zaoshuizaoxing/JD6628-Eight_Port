@@ -73,7 +73,7 @@ void W25QXX_Init(void)
     hspi1.Init.CLKPolarity       = SPI_POLARITY_LOW;
     hspi1.Init.CLKPhase          = SPI_PHASE_1EDGE;
     hspi1.Init.NSS               = SPI_NSS_SOFT;
-    hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_2;
+    hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_4;
     hspi1.Init.FirstBit          = SPI_FIRSTBIT_MSB;
     hspi1.Init.CRCCalculation    = SPI_CRCCALCULATION_DISABLE;
     hspi1.Init.CRCPolynomial     = 7U;
@@ -183,8 +183,10 @@ uint32_t W25QXX_ReadJEDECID(void)
 void W25QXX_Read(uint8_t *pBuffer, uint32_t ReadAddr, uint16_t NumByteToRead)
 {
     uint8_t cmd[5];
-    uint8_t dummy[32];
-    uint16_t i;
+
+    if ((pBuffer == 0) || (NumByteToRead == 0U)) {
+        return;
+    }
 
     cmd[0] = W25X_FastReadData;
     cmd[1] = (uint8_t)(ReadAddr >> 16);
@@ -192,22 +194,12 @@ void W25QXX_Read(uint8_t *pBuffer, uint32_t ReadAddr, uint16_t NumByteToRead)
     cmd[3] = (uint8_t)(ReadAddr);
     cmd[4] = 0xFFU;
 
-    for (i = 0; i < sizeof(dummy); i++) {
-        dummy[i] = 0xFF;
-    }
-
     W25QXX_CS_LOW();
     HAL_SPI_Transmit(&hspi1, cmd, 5, 100);
-    while (NumByteToRead > 0U) {
-        uint16_t chunk = NumByteToRead;
-
-        if (chunk > sizeof(dummy)) {
-            chunk = sizeof(dummy);
-        }
-        HAL_SPI_TransmitReceive(&hspi1, dummy, pBuffer, chunk, 100);
-        pBuffer += chunk;
-        NumByteToRead -= chunk;
-    }
+    /* W25Q ignores MOSI after the fast-read header.  In master 2-line mode
+       HAL_SPI_Receive() clocks data by using this buffer for both TX and RX,
+       avoiding hundreds of 32-byte HAL calls for every image block. */
+    HAL_SPI_Receive(&hspi1, pBuffer, NumByteToRead, 100);
     W25QXX_CS_HIGH();
 }
 
@@ -236,7 +228,10 @@ HAL_StatusTypeDef W25QXX_Read_DMA_Start(uint8_t *pBuffer, uint32_t ReadAddr, uin
     hspi1.hdmatx->Init.MemInc = DMA_MINC_DISABLE;
     CLEAR_BIT(hspi1.hdmatx->Instance->CCR, DMA_CCR_MINC);
 
-    status = HAL_SPI_TransmitReceive_DMA(&hspi1, (uint8_t *)&W25QXX_DMA_DUMMY_BYTE, pBuffer, NumByteToRead);
+    status = HAL_SPI_TransmitReceive_DMA(&hspi1,
+                                         (uint8_t *)&W25QXX_DMA_DUMMY_BYTE,
+                                         pBuffer,
+                                         NumByteToRead);
     if (status != HAL_OK) {
         W25QXX_Read_DMA_End();
     }

@@ -47,6 +47,8 @@ typedef enum
   ST7789_DATA = 1
 } ST7789_DCType;
 
+extern DMA_HandleTypeDef HdmaCh1;
+
 void ST7789_Init(void);
 void ST7789_SendByte(uint8_t dat, ST7789_DCType dc);
 void ST7789_SendHalfWord(uint16_t dat);
@@ -55,6 +57,9 @@ void ST7789_Address_Set(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2);
 void ST7789_BeginWrite(void);
 void ST7789_EndWrite(void);
 void ST7789_WriteDataBlock(const uint8_t *dat, uint16_t len);
+HAL_StatusTypeDef ST7789_WriteDataBlockStart(const uint8_t *dat, uint16_t len);
+HAL_StatusTypeDef ST7789_WriteDataBlockWait(void);
+HAL_StatusTypeDef ST7789_WriteFlashData(uint32_t read_addr, uint32_t length);
 void ST7789_SetFullWindow(void);
 void ST7789_Clear(uint16_t color);
 void ST7789_DrawPixel(uint16_t x, uint16_t y, uint16_t color);

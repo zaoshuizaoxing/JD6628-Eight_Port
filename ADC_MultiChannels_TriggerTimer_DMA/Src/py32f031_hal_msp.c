@@ -131,20 +131,20 @@ void HAL_SPI_MspInit(SPI_HandleTypeDef *hspi)
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
     HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-    HdmaCh3.Instance                 = DMA1_Channel3;
-    HdmaCh3.Init.Direction           = DMA_MEMORY_TO_PERIPH;
-    HdmaCh3.Init.PeriphInc           = DMA_PINC_DISABLE;
-    HdmaCh3.Init.MemInc              = DMA_MINC_ENABLE;
-    HdmaCh3.Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
-    HdmaCh3.Init.MemDataAlignment    = DMA_MDATAALIGN_BYTE;
-    HdmaCh3.Init.Mode                = DMA_NORMAL;
-    HdmaCh3.Init.Priority            = DMA_PRIORITY_HIGH;
-    HAL_DMA_DeInit(&HdmaCh3);
-    HAL_DMA_Init(&HdmaCh3);
-    HAL_DMA_ChannelMap(&HdmaCh3, DMA_CHANNEL_MAP_SPI2_TX);
-    __HAL_LINKDMA(hspi, hdmatx, HdmaCh3);
-    HAL_NVIC_SetPriority(DMA1_Channel2_3_IRQn, 1U, 0U);
-    HAL_NVIC_EnableIRQ(DMA1_Channel2_3_IRQn);
+    HdmaCh1.Instance                 = DMA1_Channel1;
+    HdmaCh1.Init.Direction           = DMA_MEMORY_TO_PERIPH;
+    HdmaCh1.Init.PeriphInc           = DMA_PINC_DISABLE;
+    HdmaCh1.Init.MemInc              = DMA_MINC_ENABLE;
+    HdmaCh1.Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
+    HdmaCh1.Init.MemDataAlignment    = DMA_MDATAALIGN_BYTE;
+    HdmaCh1.Init.Mode                = DMA_NORMAL;
+    HdmaCh1.Init.Priority            = DMA_PRIORITY_HIGH;
+    HAL_DMA_DeInit(&HdmaCh1);
+    HAL_DMA_Init(&HdmaCh1);
+    HAL_DMA_ChannelMap(&HdmaCh1, DMA_CHANNEL_MAP_SPI2_TX);
+    __HAL_LINKDMA(hspi, hdmatx, HdmaCh1);
+    HAL_NVIC_SetPriority(DMA1_Channel1_IRQn, 1U, 0U);
+    HAL_NVIC_EnableIRQ(DMA1_Channel1_IRQn);
   }
 }
 

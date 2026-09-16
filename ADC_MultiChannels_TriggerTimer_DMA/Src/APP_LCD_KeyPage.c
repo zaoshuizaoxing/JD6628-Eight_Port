@@ -2,7 +2,6 @@
 #include "APP_LCD_KeyPage.h"
 #include "APP_PortMonitor.h"
 
-#define LCD_IMAGE_BUFFER_LEN          4096U
 #define LCD_DIGIT_DATA_OFFSET         8U
 #define LCD_OVERLAY_DIGIT_GAP         0U
 #define LCD_OVERLAY_DIGIT_Y_OFFSET    8U
@@ -49,15 +48,10 @@
 
 #define LCD_PAGE_BOOT_DELAY_MS    4000U
 #define LCD_PAGE_POLL_DELAY_MS    5U
-#define LCD_PAGE_KEY_DEBOUNCE_MS  150U
-#define LCD_PAGE_KEY_STABLE_MS    50U
+#define LCD_PAGE_KEY_DEBOUNCE_MS  30U
 #define LCD_PAGE_KEY_GPIO_PORT    GPIOB
 #define LCD_PAGE_KEY_PIN          GPIO_PIN_2
 #define LCD_RESOURCE_LAST_ADDR    0x0071CFFFUL
-
-#if (LCD_IMAGE_BUFFER_LEN != W25QXX_SECTOR_SIZE)
-#error "LCD image buffer must match the W25Q sector size."
-#endif
 
 #if (LCD_RESOURCE_LAST_ADDR >= W25QXX_FLASH_SIZE_BYTES)
 #error "LCD image resources exceed the W25Q flash size."
@@ -103,14 +97,12 @@ typedef enum {
 #define LCD_FRAME(addr)       {addr, ST7789_FRAME_BYTES, ST7789_WIDTH, ST7789_HEIGHT}
 #define LCD_DIGIT(addr, len, w, h) {addr, len, w, h}
 
-static uint8_t lcd_image_buffer[LCD_IMAGE_BUFFER_LEN];
 static LcdPageId lcd_page_current = LCD_PAGE_BOOT;
 static uint8_t lcd_page_dirty = 1U;
 static uint32_t lcd_page_smiley_index = 0U;
-static GPIO_PinState lcd_page_key_last_state = GPIO_PIN_RESET;
-static uint8_t lcd_page_key_armed = 1U;
-static uint32_t lcd_page_key_debounce_deadline = 0U;
-static uint32_t lcd_page_key_stable_start = 0U;
+static uint8_t lcd_page_key_stable_high = 1U;
+static uint8_t lcd_page_key_last_raw_high = 1U;
+static uint32_t lcd_page_key_change_tick = 0U;
 static LcdBusinessSnapshot lcd_business_snapshot;
 static uint8_t lcd_business_timer_active = 0U;
 static uint32_t lcd_business_timer_start_tick = 0U;
@@ -223,26 +215,10 @@ static const LcdDigitPosition lcd_drawing_pos[LCD_BUSINESS_PORT_COUNT] = {
 #define LCD_DIGIT_MINUTE_COUNT ((uint8_t)(sizeof(lcd_digit_minute_table) / sizeof(lcd_digit_minute_table[0])))
 #define LCD_DIGIT_ACCUMULATE_COUNT ((uint8_t)(sizeof(lcd_digit_accumulate_table) / sizeof(lcd_digit_accumulate_table[0])))
 
-static uint16_t LcdMinU16(uint32_t value, uint16_t limit)
-{
-    return (value > limit) ? limit : (uint16_t)value;
-}
-
-static void LcdDisplayChunk(const uint8_t *buffer, uint16_t length)
-{
-    if (length != 0U) {
-        ST7789_WriteDataBlock(buffer, length);
-    }
-}
-
 static void LcdStreamFlash(uint32_t read_addr, uint32_t remaining)
 {
-    while (remaining != 0UL) {
-        uint16_t chunk = LcdMinU16(remaining, LCD_IMAGE_BUFFER_LEN);
-        W25QXX_Read(lcd_image_buffer, read_addr, chunk);
-        LcdDisplayChunk(lcd_image_buffer, chunk);
-        read_addr += chunk;
-        remaining -= chunk;
+    if (ST7789_WriteFlashData(read_addr, remaining) != HAL_OK) {
+        APP_ErrorHandler();
     }
 }
 
@@ -440,8 +416,7 @@ static void LcdDisplayFrameRect(const LcdImageDescriptor *image,
         for (row = 0U; row < height; row++) {
             uint32_t offset = (((uint32_t)(y + row) * image->width) + x) *
                               ST7789_PIXEL_BYTES;
-            W25QXX_Read(lcd_image_buffer, image->start_addr + offset, row_bytes);
-            LcdDisplayChunk(lcd_image_buffer, row_bytes);
+            LcdStreamFlash(image->start_addr + offset, row_bytes);
         }
     }
     ST7789_EndWrite();
@@ -672,38 +647,37 @@ static void LcdKeyInit(void)
     __HAL_RCC_GPIOB_CLK_ENABLE();
     init.Pin = LCD_PAGE_KEY_PIN;
     init.Mode = GPIO_MODE_INPUT;
-    init.Pull = GPIO_PULLDOWN;
+    init.Pull = GPIO_PULLUP;
+    init.Speed = GPIO_SPEED_FREQ_LOW;
     HAL_GPIO_Init(LCD_PAGE_KEY_GPIO_PORT, &init);
-    lcd_page_key_last_state =
-        HAL_GPIO_ReadPin(LCD_PAGE_KEY_GPIO_PORT, LCD_PAGE_KEY_PIN);
-    lcd_page_key_stable_start = HAL_GetTick();
-    lcd_page_key_debounce_deadline = HAL_GetTick();
-    lcd_page_key_armed = (lcd_page_key_last_state == GPIO_PIN_RESET) ? 1U : 0U;
+
+    lcd_page_key_stable_high = 1U;
+    lcd_page_key_last_raw_high = 1U;
+    lcd_page_key_change_tick = HAL_GetTick();
 }
 
 static uint8_t LcdKeyPoll(void)
 {
-    GPIO_PinState state =
-        HAL_GPIO_ReadPin(LCD_PAGE_KEY_GPIO_PORT, LCD_PAGE_KEY_PIN);
     uint32_t now = HAL_GetTick();
-    if (state != lcd_page_key_last_state) {
-        lcd_page_key_last_state = state;
-        lcd_page_key_stable_start = now;
+    uint8_t raw_high =
+        (HAL_GPIO_ReadPin(LCD_PAGE_KEY_GPIO_PORT, LCD_PAGE_KEY_PIN) == GPIO_PIN_SET) ? 1U : 0U;
+
+    if (raw_high != lcd_page_key_last_raw_high) {
+        lcd_page_key_last_raw_high = raw_high;
+        lcd_page_key_change_tick = now;
+    }
+
+    if ((now - lcd_page_key_change_tick) < LCD_PAGE_KEY_DEBOUNCE_MS) {
         return 0U;
     }
-    if ((now - lcd_page_key_stable_start) < LCD_PAGE_KEY_STABLE_MS) {
-        return 0U;
+
+    if (raw_high != lcd_page_key_stable_high) {
+        lcd_page_key_stable_high = raw_high;
+        if (raw_high == 0U) {
+            return 1U;
+        }
     }
-    if (state == GPIO_PIN_RESET) {
-        lcd_page_key_armed = 1U;
-        return 0U;
-    }
-    if ((lcd_page_key_armed != 0U) &&
-        ((int32_t)(now - lcd_page_key_debounce_deadline) >= 0)) {
-        lcd_page_key_armed = 0U;
-        lcd_page_key_debounce_deadline = now + LCD_PAGE_KEY_DEBOUNCE_MS;
-        return 1U;
-    }
+
     return 0U;
 }
 
@@ -811,7 +785,7 @@ void APP_LCD_KeyPage_Run(void)
     while (1) {
         uint16_t old_minutes = lcd_business_elapsed_minutes;
         (void)APP_PortMonitor_Poll(HAL_GetTick());
-        LcdSyncPortMonitor();
+       LcdSyncPortMonitor();
         LcdUpdatePortTotal(&lcd_business_snapshot);
         LcdUpdateTimer(lcd_business_snapshot.any_open);
         if ((lcd_page_current == LCD_PAGE_CUMULATIVE_TIME) &&
