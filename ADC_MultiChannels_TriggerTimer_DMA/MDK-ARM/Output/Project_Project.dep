@@ -110,7 +110,7 @@ I (..\..\Drivers\PY32F031_HAL_Driver\Inc\py32f031_hal_i2c.h)(0x6A8EA64D)
 I (..\..\Drivers\PY32F031_HAL_Driver\Inc\py32f031_hal_pwr.h)(0x6A8EA64D)
 I (..\..\Drivers\PY32F031_HAL_Driver\Inc\py32f031_hal_spi.h)(0x6A8EA64D)
 I (..\..\Drivers\PY32F031_HAL_Driver\Inc\py32f031_hal_uart.h)(0x6A8EA64D)
-F (..\Src\APP_LCD_KeyPage.c)(0x6AAA3E55)(--c99 -c --cpu Cortex-M0+ -D__MICROLIB -g -O0 --apcs=interwork --split_sections -I ..\Inc -I ..\..\Drivers\BSP\PY32F031xx_Start_Kit -I ..\..\Drivers\CMSIS\Include -I ..\..\Drivers\CMSIS\Device\PY32F031\Include -I ..\..\Drivers\PY32F031_HAL_Driver\Inc-I.\RTE\_Project-ID:\Keil_5_huancun\ARM\CMSIS\5.8.0\CMSIS\Core\Include-ID:\Keil_5_huancun\Puya\PY32F0xx_DFP\1.2.15\Drivers\CMSIS\Device\PY32F0xx\Include-D__UVISION_VERSION="527" -D_RTE_ -DUSE_HAL_DRIVER -DPY32F031x8-o .\output\app_lcd_keypage.o --omf_browse .\output\app_lcd_keypage.crf --depend .\output\app_lcd_keypage.d)
+F (..\Src\APP_LCD_KeyPage.c)(0x6AAA47F3)(--c99 -c --cpu Cortex-M0+ -D__MICROLIB -g -O0 --apcs=interwork --split_sections -I ..\Inc -I ..\..\Drivers\BSP\PY32F031xx_Start_Kit -I ..\..\Drivers\CMSIS\Include -I ..\..\Drivers\CMSIS\Device\PY32F031\Include -I ..\..\Drivers\PY32F031_HAL_Driver\Inc-I.\RTE\_Project-ID:\Keil_5_huancun\ARM\CMSIS\5.8.0\CMSIS\Core\Include-ID:\Keil_5_huancun\Puya\PY32F0xx_DFP\1.2.15\Drivers\CMSIS\Device\PY32F0xx\Include-D__UVISION_VERSION="527" -D_RTE_ -DUSE_HAL_DRIVER -DPY32F031x8-o .\output\app_lcd_keypage.o --omf_browse .\output\app_lcd_keypage.crf --depend .\output\app_lcd_keypage.d)
 I (..\Inc\main.h)(0x6A8FFF85)
 I (..\..\Drivers\PY32F031_HAL_Driver\Inc\py32f0xx_hal.h)(0x6A8EA64D)
 I (..\Inc\py32f031_hal_conf.h)(0x6A8EBEF0)

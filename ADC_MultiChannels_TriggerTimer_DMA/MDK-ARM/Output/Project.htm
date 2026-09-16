@@ -3,7 +3,7 @@
 <title>Static Call Graph - [.\Output\Project.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image .\Output\Project.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060960: Last Updated: Wed Sep 16 15:02:23 2026
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060960: Last Updated: Wed Sep 16 17:14:05 2026
 <BR><P>
 <H3>Maximum Stack Usage =        528 bytes + Unknown(Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -411,6 +411,7 @@ Global Symbols
 
 <P><STRONG><a name="[46]"></a>HAL_GPIO_ReadPin</STRONG> (Thumb, 18 bytes, Stack size 0 bytes, py32f031_hal_gpio.o(i.HAL_GPIO_ReadPin))
 <BR><BR>[Called By]<UL><LI><a href="#[58]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;LcdKeyPoll
+<LI><a href="#[4d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;LcdKeyInit
 <LI><a href="#[40]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;APP_I2C_SoftReadSDA
 <LI><a href="#[43]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;APP_I2C_SoftReadSCL
 </UL>
@@ -1317,17 +1318,18 @@ Local Symbols
 <LI><a href="#[57]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;LcdUpdateAccumDigit
 </UL>
 
-<P><STRONG><a name="[4d]"></a>LcdKeyInit</STRONG> (Thumb, 86 bytes, Stack size 32 bytes, app_lcd_keypage.o(i.LcdKeyInit))
+<P><STRONG><a name="[4d]"></a>LcdKeyInit</STRONG> (Thumb, 110 bytes, Stack size 32 bytes, app_lcd_keypage.o(i.LcdKeyInit))
 <BR><BR>[Stack]<UL><LI>Max Depth = 48<LI>Call Chain = LcdKeyInit &rArr; HAL_GPIO_Init
 </UL>
 <BR>[Calls]<UL><LI><a href="#[52]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GetTick
+<LI><a href="#[46]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GPIO_ReadPin
 <LI><a href="#[39]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GPIO_Init
 <LI><a href="#[38]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memclr4
 </UL>
 <BR>[Called By]<UL><LI><a href="#[4a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;APP_LCD_KeyPage_Run
 </UL>
 
-<P><STRONG><a name="[58]"></a>LcdKeyPoll</STRONG> (Thumb, 80 bytes, Stack size 16 bytes, app_lcd_keypage.o(i.LcdKeyPoll))
+<P><STRONG><a name="[58]"></a>LcdKeyPoll</STRONG> (Thumb, 104 bytes, Stack size 16 bytes, app_lcd_keypage.o(i.LcdKeyPoll))
 <BR><BR>[Stack]<UL><LI>Max Depth = 16<LI>Call Chain = LcdKeyPoll
 </UL>
 <BR>[Calls]<UL><LI><a href="#[52]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GetTick

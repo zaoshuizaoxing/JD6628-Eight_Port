@@ -48,7 +48,8 @@
 
 #define LCD_PAGE_BOOT_DELAY_MS    4000U
 #define LCD_PAGE_POLL_DELAY_MS    5U
-#define LCD_PAGE_KEY_DEBOUNCE_MS  30U
+#define LCD_PAGE_KEY_DEBOUNCE_MS  150U
+#define LCD_PAGE_KEY_STABLE_MS    50U
 #define LCD_PAGE_KEY_GPIO_PORT    GPIOB
 #define LCD_PAGE_KEY_PIN          GPIO_PIN_2
 #define LCD_RESOURCE_LAST_ADDR    0x0071CFFFUL
@@ -100,9 +101,10 @@ typedef enum {
 static LcdPageId lcd_page_current = LCD_PAGE_BOOT;
 static uint8_t lcd_page_dirty = 1U;
 static uint32_t lcd_page_smiley_index = 0U;
-static uint8_t lcd_page_key_stable_high = 1U;
-static uint8_t lcd_page_key_last_raw_high = 1U;
-static uint32_t lcd_page_key_change_tick = 0U;
+static GPIO_PinState lcd_page_key_last_state = GPIO_PIN_RESET;
+static uint8_t lcd_page_key_armed = 1U;
+static uint32_t lcd_page_key_debounce_deadline = 0U;
+static uint32_t lcd_page_key_stable_start = 0U;
 static LcdBusinessSnapshot lcd_business_snapshot;
 static uint8_t lcd_business_timer_active = 0U;
 static uint32_t lcd_business_timer_start_tick = 0U;
@@ -647,37 +649,38 @@ static void LcdKeyInit(void)
     __HAL_RCC_GPIOB_CLK_ENABLE();
     init.Pin = LCD_PAGE_KEY_PIN;
     init.Mode = GPIO_MODE_INPUT;
-    init.Pull = GPIO_PULLUP;
-    init.Speed = GPIO_SPEED_FREQ_LOW;
+    init.Pull = GPIO_PULLDOWN;
     HAL_GPIO_Init(LCD_PAGE_KEY_GPIO_PORT, &init);
-
-    lcd_page_key_stable_high = 1U;
-    lcd_page_key_last_raw_high = 1U;
-    lcd_page_key_change_tick = HAL_GetTick();
+    lcd_page_key_last_state =
+        HAL_GPIO_ReadPin(LCD_PAGE_KEY_GPIO_PORT, LCD_PAGE_KEY_PIN);
+    lcd_page_key_stable_start = HAL_GetTick();
+    lcd_page_key_debounce_deadline = HAL_GetTick();
+    lcd_page_key_armed = (lcd_page_key_last_state == GPIO_PIN_RESET) ? 1U : 0U;
 }
 
 static uint8_t LcdKeyPoll(void)
 {
+    GPIO_PinState state =
+        HAL_GPIO_ReadPin(LCD_PAGE_KEY_GPIO_PORT, LCD_PAGE_KEY_PIN);
     uint32_t now = HAL_GetTick();
-    uint8_t raw_high =
-        (HAL_GPIO_ReadPin(LCD_PAGE_KEY_GPIO_PORT, LCD_PAGE_KEY_PIN) == GPIO_PIN_SET) ? 1U : 0U;
-
-    if (raw_high != lcd_page_key_last_raw_high) {
-        lcd_page_key_last_raw_high = raw_high;
-        lcd_page_key_change_tick = now;
-    }
-
-    if ((now - lcd_page_key_change_tick) < LCD_PAGE_KEY_DEBOUNCE_MS) {
+    if (state != lcd_page_key_last_state) {
+        lcd_page_key_last_state = state;
+        lcd_page_key_stable_start = now;
         return 0U;
     }
-
-    if (raw_high != lcd_page_key_stable_high) {
-        lcd_page_key_stable_high = raw_high;
-        if (raw_high == 0U) {
-            return 1U;
-        }
+    if ((now - lcd_page_key_stable_start) < LCD_PAGE_KEY_STABLE_MS) {
+        return 0U;
     }
-
+    if (state == GPIO_PIN_RESET) {
+        lcd_page_key_armed = 1U;
+        return 0U;
+    }
+    if ((lcd_page_key_armed != 0U) &&
+        ((int32_t)(now - lcd_page_key_debounce_deadline) >= 0)) {
+        lcd_page_key_armed = 0U;
+        lcd_page_key_debounce_deadline = now + LCD_PAGE_KEY_DEBOUNCE_MS;
+        return 1U;
+    }
     return 0U;
 }
 
